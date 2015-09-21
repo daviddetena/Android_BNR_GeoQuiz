@@ -20,8 +20,8 @@ public class QuizActivity extends AppCompatActivity {
     // Initial array of questions
     private Question[] mQuestionBank = new Question[]{
             new Question(R.string.question_oceans, true),
-            new Question(R.string.question_mideast, true),
-            new Question(R.string.question_africa, true),
+            new Question(R.string.question_mideast, false),
+            new Question(R.string.question_africa, false),
             new Question(R.string.question_americas, true),
             new Question(R.string.question_asia, true)
     };
@@ -45,14 +45,16 @@ public class QuizActivity extends AppCompatActivity {
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(QuizActivity.this, R.string.correct_toast, Toast.LENGTH_SHORT).show();
+                checkAnswer(true);
+                //Toast.makeText(QuizActivity.this, R.string.correct_toast, Toast.LENGTH_SHORT).show();
             }
         });
 
         mFalseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(QuizActivity.this, R.string.incorrect_toast, Toast.LENGTH_SHORT).show();
+                checkAnswer(false);
+                //Toast.makeText(QuizActivity.this, R.string.incorrect_toast, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -94,5 +96,23 @@ public class QuizActivity extends AppCompatActivity {
     private void updateQuestion(){
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+    }
+
+    /**
+     * Method to check whether the answer pressed by the user is correct or not
+     * @param userPressedTrue User's answer: true or false
+     */
+    private void checkAnswer(boolean userPressedTrue){
+
+        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+        int messageResId = 0;
+
+        if(userPressedTrue == answerIsTrue){
+            messageResId = R.string.correct_toast;
+        }
+        else{
+            messageResId = R.string.incorrect_toast;
+        }
+        Toast.makeText(QuizActivity.this, messageResId, Toast.LENGTH_SHORT).show();
     }
 }
