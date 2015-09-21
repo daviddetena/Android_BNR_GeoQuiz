@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,7 +15,8 @@ public class QuizActivity extends AppCompatActivity {
     private TextView mQuestionTextView;
     private Button mFalseButton;
     private Button mTrueButton;
-    private Button mNextButton;
+    private ImageButton mPrevButton;
+    private ImageButton mNextButton;
     private int mCurrentIndex = 0;      // current index of question in Array
 
     // Initial array of questions
@@ -39,14 +41,24 @@ public class QuizActivity extends AppCompatActivity {
         // Wire up Buttons
         mFalseButton = (Button) findViewById(R.id.false_button);
         mTrueButton = (Button) findViewById(R.id.true_button);
-        mNextButton = (Button) findViewById(R.id.next_button);
+        mPrevButton = (ImageButton) findViewById(R.id.previous_button);
+        mNextButton = (ImageButton) findViewById(R.id.next_button);
+
+
+        // Listener for the TextView to show next question when tapping on it
+        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Next index and update text of the new question
+                nextQuestion();
+            }
+        });
 
         // Set up listener for the buttons and make a toast appear informing about the answer
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkAnswer(true);
-                //Toast.makeText(QuizActivity.this, R.string.correct_toast, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -54,7 +66,16 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 checkAnswer(false);
-                //Toast.makeText(QuizActivity.this, R.string.incorrect_toast, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        // Set up New Question Title when clicking Prev
+        mPrevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Previous index and update text of the previous question
+                previousQuestion();
             }
         });
 
@@ -63,8 +84,7 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Next index and update text of the new question
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                updateQuestion();
+                nextQuestion();
             }
         });
     }
@@ -93,6 +113,22 @@ public class QuizActivity extends AppCompatActivity {
 
 
      // UTILS
+    private void nextQuestion(){
+        mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+        updateQuestion();
+    }
+
+    private void previousQuestion(){
+        if(mCurrentIndex>0){
+            mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
+        }
+        else{
+            mCurrentIndex = mQuestionBank.length - 1;
+        }
+        updateQuestion();
+    }
+
+
     private void updateQuestion(){
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
