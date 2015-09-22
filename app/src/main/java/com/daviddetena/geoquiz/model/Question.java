@@ -1,4 +1,4 @@
-package com.daviddetena.geoquiz;
+package com.daviddetena.geoquiz.model;
 
 /**
  * Created by daviddetena on 21/09/15.

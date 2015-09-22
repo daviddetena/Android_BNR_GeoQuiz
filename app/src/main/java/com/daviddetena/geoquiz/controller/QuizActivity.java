@@ -1,5 +1,6 @@
-package com.daviddetena.geoquiz;
+package com.daviddetena.geoquiz.controller;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +12,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.daviddetena.geoquiz.R;
+import com.daviddetena.geoquiz.model.Question;
+
 public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
@@ -19,6 +23,7 @@ public class QuizActivity extends AppCompatActivity {
     private TextView mQuestionTextView;
     private Button mFalseButton;
     private Button mTrueButton;
+    private Button mCheatButton;
     private ImageButton mPrevButton;
     private ImageButton mNextButton;
     private int mCurrentIndex = 0;      // current index of question in Array
@@ -52,6 +57,7 @@ public class QuizActivity extends AppCompatActivity {
         // Wire up Buttons
         mFalseButton = (Button) findViewById(R.id.false_button);
         mTrueButton = (Button) findViewById(R.id.true_button);
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
         mPrevButton = (ImageButton) findViewById(R.id.previous_button);
         mNextButton = (ImageButton) findViewById(R.id.next_button);
 
@@ -77,6 +83,16 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 checkAnswer(false);
+            }
+        });
+
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start CheatActivity using CheatActivity static method with the answer
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent i = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivity(i);
             }
         });
 
