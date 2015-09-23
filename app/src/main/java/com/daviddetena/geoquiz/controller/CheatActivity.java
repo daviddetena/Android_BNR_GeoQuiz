@@ -14,8 +14,12 @@ import com.daviddetena.geoquiz.R;
 
 public class CheatActivity extends AppCompatActivity {
 
-    // Key string to identify the param this class will use when launched via Intent
+    // Key string to get the param this class will use when launched via Intent (like input param)
     private static final String EXTRA_ANSWER_IS_TRUE = "com.daviddetena.geoquiz.controller.answer_is_true";
+
+    // Key to put as an extra in the intent this child Activity will get back to his father (like output param)
+    private static final String EXTRA_ANSWER_SHOWN = "com.daviddetena.geoquiz.controller.answer_shown";
+
     private boolean mAnswerIsTrue;
 
     // UI Widgets
@@ -53,12 +57,14 @@ public class CheatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Whether the answer is correct or not is retrieved with EXTRA from QuizActivity
                 // intent
-                if(mAnswerIsTrue){
+                if (mAnswerIsTrue) {
                     mAnswerTextView.setText(R.string.true_button);
-                }
-                else{
+                } else {
                     mAnswerTextView.setText(R.string.false_button);
                 }
+
+                // User did cheat
+                setAnswerShownResult(true);
             }
         });
     }
@@ -83,5 +89,29 @@ public class CheatActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    // UTILS
+
+    /**
+     * Method responsible for setting extra data to an Intent which will be returned to the father
+     * @param isAnswerShown Whether the user cheated or not
+     */
+    private void setAnswerShownResult(boolean isAnswerShown){
+        Intent data = new Intent();
+        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+
+        // Get data back to the father
+        setResult(RESULT_OK, data);
+    }
+
+    /**
+     * This static method will serve for the QuizActivity to get noticed about whether the user
+     * pressed the cheat button and the answer was shown
+     * @param result
+     * @return
+     */
+    public static boolean wasAnswerShown(Intent result){
+        return result.getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
     }
 }

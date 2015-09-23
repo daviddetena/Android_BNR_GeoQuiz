@@ -1,5 +1,6 @@
 package com.daviddetena.geoquiz.controller;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +19,10 @@ import com.daviddetena.geoquiz.model.Question;
 public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
-    private static final String KEY_INDEX = "index";        // qu. index to save across rotations
+    // Key where the index for the current question will be stored so it preserves between rotations
+    private static final String KEY_INDEX = "index";
+    private static final int REQUEST_CODE_CHEAT = 0;        // Request Code for Intent
+    private boolean mIsCheater;
 
     private TextView mQuestionTextView;
     private Button mFalseButton;
@@ -92,7 +96,7 @@ public class QuizActivity extends AppCompatActivity {
                 // Start CheatActivity using CheatActivity static method with the answer
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
                 Intent i = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
-                startActivity(i);
+                startActivityForResult(i, REQUEST_CODE_CHEAT);
             }
         });
 
@@ -102,6 +106,7 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Previous index and update text of the previous question
+                mIsCheater = false;
                 previousQuestion();
             }
         });
@@ -111,6 +116,7 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Next index and update text of the new question
+                mIsCheater = false;
                 nextQuestion();
             }
         });
@@ -180,8 +186,35 @@ public class QuizActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This method is called when receiving data from a child Activity
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult()");
+        Log.d(TAG, String.valueOf(resultCode));
+        Log.d(TAG, String.valueOf(requestCode));
 
-     // UTILS
+        if(resultCode != Activity.RESULT_OK){
+            return;     // Something was wrong
+        }
+
+        if(requestCode == REQUEST_CODE_CHEAT){
+            if(data == null){
+                return;     // No back data found
+            }
+            // Check if answer was shown
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
+
+        Log.d(TAG, String.valueOf(requestCode));
+    }
+
+    // UTILS
     private void nextQuestion(){
         mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
         updateQuestion();
@@ -212,12 +245,19 @@ public class QuizActivity extends AppCompatActivity {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
 
-        if(userPressedTrue == answerIsTrue){
-            messageResId = R.string.correct_toast;
+        if(mIsCheater){
+            // Cheater toast
+            messageResId = R.string.judgment_toast;
         }
         else{
-            messageResId = R.string.incorrect_toast;
+            if(userPressedTrue == answerIsTrue){
+                messageResId = R.string.correct_toast;
+            }
+            else{
+                messageResId = R.string.incorrect_toast;
+            }
         }
-        Toast.makeText(QuizActivity.this, messageResId, Toast.LENGTH_SHORT).show();
+
+        Toast.makeText(QuizActivity.this, messageResId, Toast.LENGTH_LONG).show();
     }
 }
