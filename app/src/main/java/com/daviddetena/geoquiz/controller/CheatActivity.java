@@ -28,6 +28,7 @@ public class CheatActivity extends AppCompatActivity {
 
     // UI Widgets
     private TextView mAnswerTextView;
+    private TextView mAPIDeviceTextView;
     private Button mShowAnswerButton;
 
     /**
@@ -54,6 +55,10 @@ public class CheatActivity extends AppCompatActivity {
         // Wire up variables with UI Widgets
         mAnswerTextView = (TextView) findViewById(R.id.answer_text_view);
         mShowAnswerButton = (Button) findViewById(R.id.show_answer_button);
+
+        // Show the device current API
+        mAPIDeviceTextView = (TextView) findViewById(R.id.api_device_text_view);
+        mAPIDeviceTextView.setText(String.format("API Level %d", Build.VERSION.SDK_INT));
 
         // When clicking on the button
         mShowAnswerButton.setOnClickListener(new View.OnClickListener() {
