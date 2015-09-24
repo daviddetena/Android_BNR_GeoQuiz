@@ -1,13 +1,17 @@
 package com.daviddetena.geoquiz.controller;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -97,6 +101,48 @@ public class QuizActivity extends AppCompatActivity {
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
                 Intent i = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
                 startActivityForResult(i, REQUEST_CODE_CHEAT);
+
+
+                // Disable the navigation buttons when "cheat" button pressed
+                // Animations only available if Android API >=21
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    int cxP = mPrevButton.getWidth() / 2;
+                    int cyP = mPrevButton.getWidth() / 2;
+                    float radiusP = mPrevButton.getWidth();
+
+                    int cxN = mNextButton.getWidth() / 2;
+                    int cyN = mNextButton.getWidth() / 2;
+                    float radiusN = mNextButton.getWidth();
+
+                    // Create an animation to hide navigation buttons
+                    Animator animP = ViewAnimationUtils.createCircularReveal(mPrevButton, cxP, cyP, radiusP, 0);
+                    animP.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            mPrevButton.setVisibility(View.INVISIBLE);
+
+                        }
+                    });
+
+                    Animator animN = ViewAnimationUtils.createCircularReveal(mNextButton, cxN, cyN, radiusN, 0);
+                    animN.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            mNextButton.setVisibility(View.INVISIBLE);
+                        }
+                    });
+
+                    // Start animating
+                    animP.start();
+                    animN.start();
+
+                } else {
+                    // ANIMATION NOT SUPPORTED API <21 => Just hide buttons
+                    mPrevButton.setVisibility(View.INVISIBLE);
+                    mNextButton.setVisibility(View.INVISIBLE);
+                }
             }
         });
 
@@ -209,6 +255,10 @@ public class QuizActivity extends AppCompatActivity {
             }
             // Check if answer was shown
             mIsCheater = CheatActivity.wasAnswerShown(data);
+
+            // Make the navigation button appear again
+            mPrevButton.setVisibility(View.VISIBLE);
+            mNextButton.setVisibility(View.VISIBLE);
         }
 
         Log.d(TAG, String.valueOf(requestCode));
