@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,9 @@ import com.daviddetena.geoquiz.R;
 
 public class CheatActivity extends AppCompatActivity {
 
+    private static final String TAG = "CheatActivity";
+    private static final String KEY_CHEAT = "cheat";
+
     // Key string to get the param this class will use when launched via Intent (like input param)
     private static final String EXTRA_ANSWER_IS_TRUE = "com.daviddetena.geoquiz.controller.answer_is_true";
 
@@ -25,6 +29,8 @@ public class CheatActivity extends AppCompatActivity {
     private static final String EXTRA_ANSWER_SHOWN = "com.daviddetena.geoquiz.controller.answer_shown";
 
     private boolean mAnswerIsTrue;
+    private boolean mIsAnswerShown=false;
+
 
     // UI Widgets
     private TextView mAnswerTextView;
@@ -48,6 +54,18 @@ public class CheatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cheat);
 
+        // Check if there is already an instance to preserve whether the user did cheat
+        // across rotations
+        if(savedInstanceState!=null){
+            mIsAnswerShown = savedInstanceState.getBoolean(KEY_CHEAT);
+
+            // If the user did cheat previously we do not show the button
+            if(isAnswerShown()){
+                mAnswerTextView.setVisibility(View.VISIBLE);
+                mShowAnswerButton.setVisibility(View.INVISIBLE);
+            }
+        }
+
         // Get extra parameter and save in variable
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
 
@@ -68,10 +86,10 @@ public class CheatActivity extends AppCompatActivity {
                 }
 
                 // User did cheat
-                setAnswerShownResult(true);
+                setAnswerShownResult();
 
                 // Animations only available if Android API >=21
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     int cx = mShowAnswerButton.getWidth() / 2;
                     int cy = mShowAnswerButton.getWidth() / 2;
                     float radius = mShowAnswerButton.getWidth();
@@ -88,8 +106,7 @@ public class CheatActivity extends AppCompatActivity {
                     });
                     // Start animating
                     anim.start();
-                }
-                else{
+                } else {
                     // ANIMATION NOT SUPPORTED API <21 => Just Display answer and hide "cheat" button
                     mAnswerTextView.setVisibility(View.VISIBLE);
                     mShowAnswerButton.setVisibility(View.INVISIBLE);
@@ -97,6 +114,17 @@ public class CheatActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+
+        Log.i(TAG, "onSaveInstanceState()");
+        // Save current status about whether the user did cheat in Bundle key-value pair
+        savedInstanceState.putBoolean(KEY_CHEAT, mIsAnswerShown);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -120,15 +148,31 @@ public class CheatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+    public boolean isAnswerShown() {
+        return mIsAnswerShown;
+    }
+
+    public void setIsAnswerShown(boolean isAnswerShown) {
+        mIsAnswerShown = isAnswerShown;
+    }
+
+
+
     // UTILS
 
     /**
      * Method responsible for setting extra data to an Intent which will be returned to the father
-     * @param isAnswerShown Whether the user cheated or not
      */
-    private void setAnswerShownResult(boolean isAnswerShown){
+    private void setAnswerShownResult(){
+
+        // Set that the user did cheat
+        setIsAnswerShown(true);
+
+        // And put it as a parameter to get back to the father Activity
         Intent data = new Intent();
-        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown());
 
         // Get data back to the father
         setResult(RESULT_OK, data);
